@@ -1,0 +1,152 @@
+.Details {
+  /* base size for root; everything else in ems */
+  font-size: 16px;
+
+  display: grid;
+  align-items: center;
+  grid-template-columns: auto minmax(auto, 60em);
+  /* min-width: 75vw; */
+  gap: 5em;
+
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  text-transform: none;
+
+  margin-inline: 6em;
+  color: #6d5e11;
+
+  a:not(.Details-button) {
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+
+    &:hover {
+      cursor: pointer;
+      color: #18cfa4;
+      color: black;
+    }
+  }
+
+  *:focus-visible {
+    outline: solid 0.25em #6d5e11;
+  }
+
+  @media (width <= 800px) {
+    grid-template-columns: auto;
+    font-size: min(12px, 2vw);
+    gap: 3em;
+    margin-inline: 1em;
+  }
+}
+
+.Details_main {
+  display: grid;
+  gap: 1.25em;
+  grid-template-columns: 1fr;
+  font-size: 2em;
+
+  & > p {
+    margin: 0;
+  }
+}
+
+.Details__sidebar {
+  display: grid;
+  place-content: center;
+
+  @media (width <= 800px) {
+    justify-content: stretch;
+  }
+}
+
+.Details-star-button,
+.Details-button {
+  box-shadow: 0.35em 0.35em 1.5em rgba(0 0 0 / 0.3);
+  cursor: pointer;
+
+  color: #575968;
+
+  &:active {
+    box-shadow: 0.35em 0.35em 1em rgba(0 0 0 / 0.2);
+    transition: none;
+  }
+
+  transition: transform ease 200ms;
+  &:hover:not(:active) {
+    transform: scale(1.01);
+  }
+}
+
+.Details-star-button {
+  appearance: none;
+  aspect-ratio: 1 / 1;
+  background-color: #15cfa4;
+  border: solid 0.25em #65ecbf;
+  border-radius: 50%;
+  padding: 1.25em;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-family: inherit;
+  font-size: 2em;
+  gap: 0.75em;
+
+  & > :first-child {
+    font-size: 2em;
+    line-height: 0.3;
+  }
+
+  &:hover {
+    background-color: #11d5a7;
+  }
+
+  &:active {
+    background-color: #18cfa4;
+    box-shadow: 0 0 1.5em rgba(0 0 0 / 0.2);
+  }
+
+  @media (width <= 800px) {
+    border-radius: 1em;
+    /* gap: 1em; */
+    aspect-ratio: initial;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    padding: 1em;
+
+    & > :first-child {
+      font-size: 1.5em;
+      position: relative;
+      top: -0.05em;
+    }
+  }
+}
+
+.Details__buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1em;
+}
+
+.Details-button,
+.Details input[type="text"] {
+  border-radius: 1em;
+  appearance: none;
+  padding: 1em;
+  font-size: 2em;
+  font-family: inherit;
+  background-color: #f0dd1d;
+}
+
+.Details-button {
+  appearance: none;
+  border: none;
+  background-color: #f0dd1d;
+  box-shadow: 0.35em 0.35em 1.5em rgba(0 0 0 / 0.3);
+  font-size: inherit;
+  padding: 1em;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+}

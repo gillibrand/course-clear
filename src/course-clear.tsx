@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useRef } from "react";
+import { PropsWithChildren, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import "./course-clear.css";
-
-interface CourseClearProps {
-  text?: string;
-  barCount?: number;
-}
 
 interface CancelablePromise<T> extends Promise<T> {
   cancel: () => void;
@@ -50,6 +45,13 @@ const WaveKeyframes = [
   },
 ];
 
+/**
+ * Decorates a function so it can only be called once. Used for cleanup functions that might be
+ * called normally or during unmount.
+ *
+ * @param fn Function to call (once).
+ * @returns New function that will call the given fn on the first call only.
+ */
 function once(fn: () => void) {
   let done = false;
 
@@ -60,16 +62,43 @@ function once(fn: () => void) {
   };
 }
 
-export function CourseClear({ text = "Course Clear!", barCount = 22 }: CourseClearProps) {
+interface CourseClearProps {
+  /**
+   * Greeting message to animate in before main content show.
+   */
+  greeting?: string;
+
+  /**
+   * How many vertical stripes to animate for the wave effect. If undefined, will use a number
+   * appropriate for the screen width.
+   */
+  barCount?: number;
+
+  children?: ReactNode;
+}
+
+export function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseClearProps) {
   const domRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const [isShowChildren, setIsShowChildren] = useState(false);
+
+  function showChildren() {
+    setIsShowChildren(true);
+  }
+
+  function getBarCount() {
+    if (typeof barCount === "number" && barCount > 0) return barCount;
+    return window.innerWidth > 768 ? 22 : 11;
+  }
 
   const animateWave = useCallback(() => {
     if (!domRef.current) return;
     if (cleanupRef.current) cleanupRef.current();
-    domRef.current.classList.remove("is-finished");
+    domRef.current.classList.remove("is-wave-finished");
 
     const bars: HTMLDivElement[] = [];
+
+    const barCount = getBarCount();
 
     for (let i = 0; i < barCount; i++) {
       const bar = document.createElement("div");
@@ -82,44 +111,50 @@ export function CourseClear({ text = "Course Clear!", barCount = 22 }: CourseCle
 
     const anims: Animation[] = [];
 
+    let intervalId: number;
+
     const cleanup = once(function cleanup() {
-      clearInterval(id);
+      clearInterval(intervalId);
       anims.forEach((anim) => anim.finish());
       bars.forEach((bar) => bar.parentNode?.removeChild(bar));
       cleanupRef.current = null;
-      domRef.current?.classList.add("is-finished");
+      domRef.current?.classList.add("is-wave-finished");
     });
     cleanupRef.current = cleanup;
 
-    let i = 0;
-    const id = setInterval(() => {
-      const bar = bars[i++];
-      if (!bar) {
-        clearInterval(id);
-        return;
-      }
+    return cancelable(
+      cleanup,
+      new Promise<void>((resolve) => {
+        let i = 0;
+        intervalId = setInterval(() => {
+          const bar = bars[i++];
+          if (!bar) {
+            clearInterval(intervalId);
+            return;
+          }
 
-      const anim = bar.animate(WaveKeyframes, {
-        easing: "ease-out",
-        duration: 1000,
-        fill: "forwards",
-      });
+          const anim = bar.animate(WaveKeyframes, {
+            easing: "ease-out",
+            duration: 1000,
+            fill: "forwards",
+          });
 
-      anims.push(anim);
+          anims.push(anim);
 
-      if (i >= barCount) {
-        anim.finished.finally(cleanup);
-      }
-    }, 30);
-
-    return cleanup;
+          if (i >= barCount) {
+            anim.finished.finally(cleanup);
+            resolve();
+          }
+        }, 30);
+      })
+    );
   }, [barCount]);
 
   const animateCurtains = useCallback(() => {
     if (!domRef.current) return;
     if (cleanupRef.current) cleanupRef.current();
 
-    domRef.current.classList.remove("is-finished");
+    domRef.current.classList.remove("is-wave-finished", "is-curtains-finished");
 
     const top = document.createElement("div");
     top.className = "course-clear__curtain course-clear__curtain--top";
@@ -139,7 +174,7 @@ export function CourseClear({ text = "Course Clear!", barCount = 22 }: CourseCle
 
     const cleanup = once(() => {
       [top, bottom].forEach((curtain) => curtain.parentNode?.removeChild(curtain));
-      clearTimeout(timer);
+      cancelAnimationFrame(timer);
     });
 
     cleanupRef.current = cleanup;
@@ -148,6 +183,7 @@ export function CourseClear({ text = "Course Clear!", barCount = 22 }: CourseCle
       cleanup,
       new Promise<void>((resolve) => {
         bottom.addEventListener("transitionend", () => {
+          domRef.current?.classList.add("is-curtains-finished");
           cleanup();
           resolve();
           cleanupRef.current = null;
@@ -157,13 +193,16 @@ export function CourseClear({ text = "Course Clear!", barCount = 22 }: CourseCle
   }, []);
 
   const animateAll = useCallback(async () => {
+    setIsShowChildren(false);
+
     const curtainsPromise = animateCurtains();
     await curtainsPromise;
-    const waveCancel = animateWave();
+    const wavePromise = animateWave();
+    await wavePromise;
 
     return () => {
       if (curtainsPromise) curtainsPromise.cancel();
-      if (waveCancel) waveCancel();
+      if (wavePromise) wavePromise.cancel();
     };
   }, [animateCurtains, animateWave]);
 
@@ -172,11 +211,14 @@ export function CourseClear({ text = "Course Clear!", barCount = 22 }: CourseCle
   }, [animateAll]);
 
   return (
-    <div className="course-clear" ref={domRef} onClick={animateAll}>
-      <div className="course-clear__text-row">
-        <span className="course-clear__text-wrapper">
-          <span className="course-clear__text">{text}</span>
-        </span>
+    <div className="course-clear" ref={domRef}>
+      <div className="course-clear__content">
+        {!isShowChildren && (
+          <div className="course-clear__message" onAnimationEnd={showChildren}>
+            {greeting}
+          </div>
+        )}
+        <div className="course-clear__children">{children}</div>
       </div>
     </div>
   );

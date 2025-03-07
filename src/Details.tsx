@@ -11,11 +11,11 @@ function Details({ onClick }: { onClick?: () => void }) {
       </div>
 
       <div className="Details_main">
-        <p>Hi I'm Jay.</p>
+        <p>Hi, I'm Jay.</p>
 
         <p>
-          This is demo of my video game-inspired <a href="#course-clear">Course Clear</a> web component. Learn more
-          about me on my projects site.
+          This is demo of my video game-inspired <a href="#CourseClear">Course Clear</a> web component. Learn more about
+          me on my projects site.
         </p>
 
         <div className="Details__buttons">

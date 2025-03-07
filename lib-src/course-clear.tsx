@@ -1,5 +1,8 @@
-import { PropsWithChildren, ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import "./course-clear.css";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+// import "./CourseClear.module.css";
+import s from "./course-clear.module.css";
+
+console.info(">>> ", s.asd);
 
 interface CancelablePromise<T> extends Promise<T> {
   cancel: () => void;
@@ -77,7 +80,7 @@ interface CourseClearProps {
   children?: ReactNode;
 }
 
-export function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseClearProps) {
+function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseClearProps) {
   const domRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const [isShowChildren, setIsShowChildren] = useState(false);
@@ -86,15 +89,15 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
     setIsShowChildren(true);
   }
 
-  function getBarCount() {
+  const getBarCount = useCallback(() => {
     if (typeof barCount === "number" && barCount > 0) return barCount;
     return window.innerWidth > 768 ? 22 : 11;
-  }
+  }, [barCount]);
 
   const animateWave = useCallback(() => {
     if (!domRef.current) return;
     if (cleanupRef.current) cleanupRef.current();
-    domRef.current.classList.remove("is-wave-finished");
+    domRef.current.classList.remove(s.isWaveFinished);
 
     const bars: HTMLDivElement[] = [];
 
@@ -102,7 +105,7 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
 
     for (let i = 0; i < barCount; i++) {
       const bar = document.createElement("div");
-      bar.className = "course-clear__bar";
+      bar.className = s.CourseClear__bar;
       bar.style.insetInlineStart = `calc(100% / ${barCount}  * ${i})`;
       bar.style.width = `calc(100% / ${barCount} + 1px)`;
       domRef.current.appendChild(bar);
@@ -111,14 +114,14 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
 
     const anims: Animation[] = [];
 
-    let intervalId: number;
+    let intervalId: ReturnType<typeof setTimeout>;
 
     const cleanup = once(function cleanup() {
       clearInterval(intervalId);
       anims.forEach((anim) => anim.finish());
       bars.forEach((bar) => bar.parentNode?.removeChild(bar));
       cleanupRef.current = null;
-      domRef.current?.classList.add("is-wave-finished");
+      domRef.current?.classList.add(s.isWaveFinished);
     });
     cleanupRef.current = cleanup;
 
@@ -148,18 +151,18 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
         }, 30);
       })
     );
-  }, [barCount]);
+  }, [getBarCount]);
 
   const animateCurtains = useCallback(() => {
     if (!domRef.current) return;
     if (cleanupRef.current) cleanupRef.current();
 
-    domRef.current.classList.remove("is-wave-finished", "is-curtains-finished");
+    domRef.current.classList.remove(s.isWaveFinished, s.isCurtainsFinished);
 
     const top = document.createElement("div");
-    top.className = "course-clear__curtain course-clear__curtain--top";
+    top.className = `${s.CourseClear__curtain} ${s.CourseClear__curtainTop}`;
     const bottom = document.createElement("div");
-    bottom.className = "course-clear__curtain course-clear__curtain--bottom";
+    bottom.className = `${s.CourseClear__curtain} ${s.CourseClear__curtainBottom}`;
 
     domRef.current.appendChild(top);
     domRef.current.appendChild(bottom);
@@ -167,14 +170,15 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
     const timer = requestAnimationFrame(() => {
       // This ensure we have done an initial layout, then add the class to transition after
       requestAnimationFrame(() => {
-        top.classList.add("is-shrink");
-        bottom.classList.add("is-shrink");
+        top.classList.add(s.isShrink);
+        bottom.classList.add(s.isShrink);
       });
     });
 
     const cleanup = once(() => {
       [top, bottom].forEach((curtain) => curtain.parentNode?.removeChild(curtain));
       cancelAnimationFrame(timer);
+      // domRef.current?.classList.remove(s.isCurtainsFinished);
     });
 
     cleanupRef.current = cleanup;
@@ -183,8 +187,8 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
       cleanup,
       new Promise<void>((resolve) => {
         bottom.addEventListener("transitionend", () => {
-          domRef.current?.classList.add("is-curtains-finished");
           cleanup();
+          domRef.current?.classList.add(s.isCurtainsFinished);
           resolve();
           cleanupRef.current = null;
         });
@@ -211,15 +215,18 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
   }, [animateAll]);
 
   return (
-    <div className="course-clear" ref={domRef}>
-      <div className="course-clear__content">
+    <div className={s.CourseClear} ref={domRef}>
+      <div className={s.CourseClear__content}>
         {!isShowChildren && (
-          <div className="course-clear__message" onAnimationEnd={showChildren}>
+          <div className={s.CourseClear__message} onAnimationEnd={showChildren}>
             {greeting}
           </div>
         )}
-        <div className="course-clear__children">{children}</div>
+        {isShowChildren && <div className={s.CourseClear__children}>{children}</div>}
       </div>
     </div>
   );
 }
+
+export { CourseClear };
+export type { CourseClearProps };

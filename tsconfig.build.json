@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  // exclude the dev src dir so build doesn't include those types
+  "include": ["lib-src"]
+}

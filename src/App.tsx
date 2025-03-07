@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import { CourseClear } from "./course-clear";
+import { CourseClear } from "@lib/course-clear";
 import { Details } from "./Details";
 
 function App() {

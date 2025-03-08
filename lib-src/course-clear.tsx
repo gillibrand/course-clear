@@ -1,17 +1,14 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-// import "./CourseClear.module.css";
 import s from "./course-clear.module.css";
-
-console.info(">>> ", s.asd);
 
 interface CancelablePromise<T> extends Promise<T> {
   cancel: () => void;
 }
 
 function cancelable<T>(cancel: () => void, promise: Promise<T>) {
-  const cp = promise as CancelablePromise<T>;
-  cp.cancel = cancel;
-  return cp;
+  return Object.assign(promise, {
+    cancel,
+  }) as CancelablePromise<T>;
 }
 
 // Values captured from a screenshot using https://github.com/gillibrand/keyframe-gen
@@ -77,10 +74,15 @@ interface CourseClearProps {
    */
   barCount?: number;
 
+  /**
+   * The main content to show after the greeting. Likely needs a way to remove the clear-course
+   * component, since it will obstruct everything below it, e.g., a link to another page or a button
+   * to dismiss it.
+   */
   children?: ReactNode;
 }
 
-function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseClearProps) {
+export function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseClearProps) {
   const domRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const [isShowChildren, setIsShowChildren] = useState(false);
@@ -178,7 +180,6 @@ function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseC
     const cleanup = once(() => {
       [top, bottom].forEach((curtain) => curtain.parentNode?.removeChild(curtain));
       cancelAnimationFrame(timer);
-      // domRef.current?.classList.remove(s.isCurtainsFinished);
     });
 
     cleanupRef.current = cleanup;
@@ -188,21 +189,24 @@ function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseC
       new Promise<void>((resolve) => {
         bottom.addEventListener("transitionend", () => {
           cleanup();
+          cleanupRef.current = null;
           domRef.current?.classList.add(s.isCurtainsFinished);
           resolve();
-          cleanupRef.current = null;
         });
       })
     );
   }, []);
 
-  const animateAll = useCallback(async () => {
+  const animateAll = useCallback(() => {
     setIsShowChildren(false);
 
     const curtainsPromise = animateCurtains();
-    await curtainsPromise;
-    const wavePromise = animateWave();
-    await wavePromise;
+    let wavePromise: CancelablePromise<void> | undefined;
+
+    curtainsPromise?.then(() => {
+      wavePromise = animateWave();
+      // wavePromise;
+    });
 
     return () => {
       if (curtainsPromise) curtainsPromise.cancel();
@@ -211,7 +215,7 @@ function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseC
   }, [animateCurtains, animateWave]);
 
   useEffect(() => {
-    animateAll();
+    return animateAll();
   }, [animateAll]);
 
   return (
@@ -222,11 +226,8 @@ function CourseClear({ greeting = "Course Clear!", barCount, children }: CourseC
             {greeting}
           </div>
         )}
-        {isShowChildren && <div className={s.CourseClear__children}>{children}</div>}
+        <div className={s.CourseClear__children}>{children}</div>
       </div>
     </div>
   );
 }
-
-export { CourseClear };
-export type { CourseClearProps };

@@ -6,19 +6,10 @@
   "module": "./dist/course-clear.js",
   "types": "dist/index.d.ts",
   "exports": {
-    "./react": {
-      "import": "./dist/course-clear-react.es.js",
-      "require": "./dist/course-clear-react.cjs.js",
-      "types": "./dist/course-clear-react.d.ts"
-    },
-    "./web": {
+    ".": {
       "import": "./dist/course-clear-web.es.js",
       "require": "./dist/course-clear-web.cjs.js",
-      "types": "./dist/course-clear-web.d.ts"
-    },
-    "./style.css": {
-      "import": "./dist/style.css",
-      "require": "./dist/style.css"
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {

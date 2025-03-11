@@ -25,12 +25,12 @@ export default css`
     box-sizing: border-box;
 
     &::backdrop {
-      transition: background-color 200ms ease;
-      background-color: rgba(255 255 255 / 0);
+      transition: background-color 200ms;
+      background-color: rgba(0 0 0 / 0);
     }
 
-    &.is-open::backdrop {
-      background-color: rgba(255 255 255 / 0.4);
+    &.is-curtains-finished::backdrop {
+      background-color: rgba(0 0 0 / 0.75);
     }
   }
 

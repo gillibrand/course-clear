@@ -1,8 +1,12 @@
-// declare namespace JSX {
-//   interface IntrinsicElements {
-//     "c-c": {
-//       message?: string;
-//       count?: number;
-//     } & React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-//   }
-// }
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "course-clear": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        greeting?: string;
+        open?: string;
+      };
+    }
+  }
+}
+
+export {};

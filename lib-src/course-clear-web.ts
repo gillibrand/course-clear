@@ -1,5 +1,4 @@
 import cssString from "./course-clear-css.js";
-import "./course-clear.css";
 import { html } from "./lib.js";
 
 interface CancelablePromise<T> extends Promise<T> {
@@ -217,8 +216,6 @@ export class CourseClearWeb extends HTMLElement {
   private _hideOrRunAnimations() {
     if (!this._rootEl) return;
 
-    this._rootEl.classList.toggle("is-open");
-
     if (this.open) {
       this._rootEl.showModal();
       this._animateAll();
@@ -236,7 +233,10 @@ export class CourseClearWeb extends HTMLElement {
       this._cancelActive();
       cleanup();
     } else {
-      // We're done animating and settled, so animate out too
+      // We're done animating and settled, so animate out too/
+      // remove curtains class early to trigger backdrop transition
+      this._rootEl.classList.remove("is-curtains-finished");
+
       this._rootEl
         .animate(
           [
@@ -249,7 +249,6 @@ export class CourseClearWeb extends HTMLElement {
           ],
           {
             duration: 200,
-            easing: "ease-in-out",
           }
         )
         .finished.then(cleanup);
@@ -284,7 +283,9 @@ export class CourseClearWeb extends HTMLElement {
       <dialog class="CourseClear" id="_rootEl" style="display: none">
         <div class="CourseClear__content">
           <div class="CourseClear__greeting" id="_greetingEl"></div>
-          <div class="CourseClear__children" id="_childrenEl"></div>
+          <div class="CourseClear__children" id="_childrenEl">
+            <slot />
+          </div>
         </div>
       </dialog>`;
 
@@ -292,9 +293,6 @@ export class CourseClearWeb extends HTMLElement {
     this.shadowRoot!.querySelectorAll("[id]").forEach((el) => {
       this[el.id] = el;
     });
-
-    // Add children / main content
-    this.childNodes.forEach((n) => this._childrenEl.appendChild(n));
 
     // Events
     this._childrenEl.addEventListener("transitionend", () => {

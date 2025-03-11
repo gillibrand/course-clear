@@ -222,7 +222,7 @@ export function CourseClear({ greeting = "Course Clear!", barCount, children }: 
     <div className={s.CourseClear} ref={domRef}>
       <div className={s.CourseClear__content}>
         {!isShowChildren && (
-          <div className={s.CourseClear__message} onAnimationEnd={showChildren}>
+          <div className={s.CourseClear__greeting} onAnimationEnd={showChildren}>
             {greeting}
           </div>
         )}

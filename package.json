@@ -2,16 +2,21 @@
   "name": "course-clear",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/course-clear.umd.cjs",
+  "main": "./dist/course-clear.cjs",
   "module": "./dist/course-clear.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./dist/course-clear.js",
-      "require": "./dist/course-clear.umd.cjs",
-      "types": "./dist/index.d.ts"
+    "./react": {
+      "import": "./dist/course-clear-react.es.js",
+      "require": "./dist/course-clear-react.cjs.js",
+      "types": "./dist/course-clear-react.d.ts"
     },
-    "./styles.css": {
+    "./web": {
+      "import": "./dist/course-clear-web.es.js",
+      "require": "./dist/course-clear-web.cjs.js",
+      "types": "./dist/course-clear-web.d.ts"
+    },
+    "./style.css": {
       "import": "./dist/style.css",
       "require": "./dist/style.css"
     }
@@ -49,6 +54,7 @@
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.11.0",
     "vite": "^5.4.10",
-    "vite-plugin-dts": "^4.5.3"
+    "vite-plugin-dts": "^4.5.3",
+    "vite-plugin-web-components-hmr": "^0.1.3"
   }
 }

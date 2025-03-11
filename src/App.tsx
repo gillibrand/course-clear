@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CourseClear } from "@lib/course-clear";
+import { CourseClear } from "@lib/course-clear-react";
 import { Details } from "./Details";
 
 function App() {
@@ -18,6 +18,7 @@ function App() {
 
   return (
     <div onClick={handleReplayClick}>
+      {/* <c-c checked /> */}
       <CourseClear greeting={text} key={key}>
         <Details />
       </CourseClear>

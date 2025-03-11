@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
@@ -28,11 +28,14 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      entry: [path.resolve(__dirname, "lib-src/course-clear.tsx")],
+      entry: [
+        // path.resolve(__dirname, "lib-src/course-clear-react.tsx"),
+        path.resolve(__dirname, "lib-src/course-clear-web.ts"),
+      ],
       name: "course-clear",
-      // fileName: (format) => `course-clear.${format}.js`,
+      fileName: (format, name) => `${name}.${format}.js`,
       // fileName: "course-clear",
-      // formats: ["es", "cjs"], // Removes UMD
+      formats: ["es", "cjs"], // Removes UMD
     },
     rollupOptions: {
       external: [

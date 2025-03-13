@@ -30,8 +30,8 @@ From HTML:
 
 ```
 <body>
-	<course-clear greeting="My Greeting!" open>
-		In the dialog.
-	</course-clear>
+  <course-clear greeting="My Greeting!" open>
+    In the dialog.
+  </course-clear>
 </body>
 ```

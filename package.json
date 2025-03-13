@@ -20,7 +20,6 @@
     "prewatch": "rimraf dist/*",
     "watch": "vite build --watch",
     "lint": "eslint .",
-    "preview": "vite preview",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {

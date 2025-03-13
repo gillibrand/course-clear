@@ -1,30 +1,29 @@
 {
   "name": "course-clear",
+  "private": true,
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/course-clear.cjs",
-  "module": "./dist/course-clear.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/CourseClear.cjs.js",
+  "module": "./dist/CourseClear.es.js",
+  "types": "dist/CourseClear.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/course-clear-web.es.js",
-      "require": "./dist/course-clear-web.cjs.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/CourseClear.es.js",
+      "require": "./dist/CourseClear.cjs.js",
+      "types": "./dist/CourseClear.d.ts"
     }
   },
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build",
+    "dev": "vite",
+    "prebuild": "rimraf dist/*",
+    "build": " vite build",
+    "prewatch": "rimraf dist/*",
     "watch": "vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "react": ">=17",
-    "react-dom": ">=17"
-  },
-  "dependencies": {
     "react": ">=17",
     "react-dom": ">=17"
   },
@@ -41,11 +40,14 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.11.0",
-    "terser": "^5.39.0",
+    "react": ">=17",
+    "react-dom": ">=17",
+    "rimraf": "^6.0.1",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.11.0",
     "vite": "^5.4.10",
     "vite-plugin-dts": "^4.5.3",
-    "vite-plugin-web-components-hmr": "^0.1.3"
+    "vite-plugin-web-components-hmr": "^0.1.3",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

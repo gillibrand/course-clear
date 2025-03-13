@@ -1,5 +1,5 @@
 import cssString from "./course-clear-css.js";
-import { html } from "./lib.js";
+import { html } from "./util.js";
 
 interface CancelablePromise<T> extends Promise<T> {
   cancel: () => void;
@@ -63,7 +63,7 @@ function once<Args extends unknown[]>(fn: (...args: Args) => void) {
   };
 }
 
-export class CourseClearWeb extends HTMLElement {
+export class CourseClear extends HTMLElement {
   // So we can set props by index
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
@@ -81,7 +81,7 @@ export class CourseClearWeb extends HTMLElement {
 
   connectedCallback() {
     this._render();
-    this._hideOrRunAnimations();
+    if (this.open) this._hideOrRunAnimations();
   }
 
   disconnectedCallback() {
@@ -98,6 +98,14 @@ export class CourseClearWeb extends HTMLElement {
     } else {
       this.removeAttribute("open");
     }
+  }
+
+  get greeting() {
+    return this.getAttribute("greeting") || "Course Clear!";
+  }
+
+  set greeting(value: string) {
+    this.setAttribute("greeting", value);
   }
 
   static get observedAttributes() {
@@ -215,14 +223,14 @@ export class CourseClearWeb extends HTMLElement {
 
   private _hideOrRunAnimations() {
     if (!this._rootEl) return;
-
     if (this.open) {
+      this._rootEl.style.display = "";
       this._rootEl.showModal();
       this._animateAll();
       return;
     }
 
-    const cleanup = () => {
+    const closeCleanup = () => {
       this._rootEl.style.display = "none";
       this._rootEl.classList.remove("is-curtains-finished", "is-wave-finished");
       this._rootEl.close();
@@ -231,7 +239,7 @@ export class CourseClearWeb extends HTMLElement {
     if (this._active) {
       // If active, just abort
       this._cancelActive();
-      cleanup();
+      closeCleanup();
     } else {
       // We're done animating and settled, so animate out too/
       // remove curtains class early to trigger backdrop transition
@@ -242,16 +250,18 @@ export class CourseClearWeb extends HTMLElement {
           [
             {
               opacity: 1,
+              // translate: "0 0",
             },
             {
               opacity: 0,
+              // translate: "0 -2rem",
             },
           ],
           {
             duration: 200,
           }
         )
-        .finished.then(cleanup);
+        .finished.then(closeCleanup);
     }
   }
 
@@ -259,7 +269,7 @@ export class CourseClearWeb extends HTMLElement {
     this._cancelActive();
     this._rootEl.style.display = "";
 
-    this._greetingEl.textContent = this.getAttribute("greeting") || "Course Clear!";
+    this._greetingEl.textContent = this.greeting;
     this._greetingEl.style.display = "";
 
     this._rootEl.classList.remove("is-curtains-finished", "is-wave-finished");
@@ -302,16 +312,4 @@ export class CourseClearWeb extends HTMLElement {
   }
 }
 
-try {
-  customElements.define("course-clear", CourseClearWeb);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const meta = import.meta as any;
-  if (meta.hot) {
-    meta.hot.accept(() => {
-      location.reload(); // Full page refresh as a last resort
-    });
-  }
-} catch (e) {
-  if ((e as Error).name === "NotSupportedError") location.reload();
-}
+customElements.define("course-clear", CourseClear);

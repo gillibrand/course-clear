@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "@lib/course-clear-web";
+import "course-clear";
 
 import { Details } from "./Details";
 
@@ -15,7 +15,7 @@ function App() {
 
     // Just toggle closed and open with a delay to replay
     setOpen(false);
-    setTimeout(() => setOpen(true), 300);
+    setTimeout(() => setOpen(true), 1000);
   }
 
   return (

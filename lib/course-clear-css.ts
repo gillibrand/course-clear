@@ -1,4 +1,4 @@
-import { css } from "./lib";
+import { css } from "./util";
 
 export default css`
   :host {

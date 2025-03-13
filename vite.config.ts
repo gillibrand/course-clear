@@ -21,7 +21,7 @@ export default defineConfig({
       entry: resolve(__dirname, "lib/CourseClear.ts"),
       name: "course-clear",
       fileName: (format, name) => `${name}.${format}.js`,
-      formats: ["es", "cjs"],
+      formats: ["es"],
     },
   },
 });

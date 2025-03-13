@@ -21,10 +21,6 @@
     "lint": "eslint .",
     "prepublishOnly": "npm run build"
   },
-  "peerDependencies": {
-    "react": ">=17",
-    "react-dom": ">=17"
-  },
   "files": [
     "dist"
   ],

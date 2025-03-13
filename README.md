@@ -28,6 +28,8 @@ courseClear.open = 'My Greeting!';
 
 From HTML:
 
+Importing `course-clear` into a module will automatically define it as a custom HTML element. This is a side-effect of the import. After that, use it like a normal element.
+
 ```
 <body>
   <course-clear greeting="My Greeting!" open>

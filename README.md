@@ -1,3 +1,5 @@
 # Course Clear
 
-A simple web component to open a dialog with a fun animation similar to that in Super Mario Maker.
+A small web component that opens a dialog with a fun animation similar to that in Super Mario Maker.
+
+<img src="./screenshot.png">

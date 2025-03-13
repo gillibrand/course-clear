@@ -20,7 +20,7 @@ function App() {
 
   return (
     <div onClick={handleReplayClick}>
-      <course-clear greeting={text} open={open ? "" : undefined}>
+      <course-clear greeting={text} open={open ? "" : undefined} close-on-esc="">
         <Details />
       </course-clear>
     </div>

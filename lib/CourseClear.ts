@@ -1,10 +1,20 @@
 import cssString from "./course-clear-css.js";
 import { html } from "./util.js";
 
+/**
+ * A promise that can be canceled.
+ */
 interface CancelablePromise<T> extends Promise<T> {
   cancel: () => void;
 }
 
+/**
+ * Wraps a promise as a cancelable promise.
+ *
+ * @param cancel Function to call on cancel.
+ * @param promise A normal promise to add the cancel function to.
+ * @returns Given promise that can be canceled.
+ */
 function cancelable<Args extends unknown[], T>(cancel: (...args: Args) => void, promise: Promise<T>) {
   // cancel();
   return Object.assign(promise, {
@@ -63,11 +73,24 @@ function once<Args extends unknown[]>(fn: (...args: Args) => void) {
   };
 }
 
+/**
+ * Component to open the dialog with an animation. Set the `greeting` attribute for the short,
+ * initial message to animate in. Children are shown as the main content of the dialog after the
+ * animation.
+ *
+ * Be sure to add a way to close the dialog or progress somehow since it does not have its own close
+ * button. Optionall add the `close-on-esc` attribute to close with the Esc key.
+ *
+ * @element course-clear
+ */
 export class CourseClear extends HTMLElement {
   // So we can set props by index
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 
+  /**
+   * The active animation. Used to cancel whatever step we're on.
+   */
   private _active: CancelablePromise<void> | undefined;
 
   private _greetingEl = null as unknown as HTMLDivElement;
@@ -81,13 +104,20 @@ export class CourseClear extends HTMLElement {
 
   connectedCallback() {
     this._render();
-    if (this.open) this._hideOrRunAnimations();
+    if (this.open) this._closeOrRunAnimations();
   }
 
   disconnectedCallback() {
     this._cancelActive();
   }
 
+  /**
+   * Set to open and close the dialog. Reflects it current state.
+   *
+   * @attribute open
+   * @type {boolean}
+   * @default undefined.
+   */
   get open() {
     return this.hasAttribute("open");
   }
@@ -100,12 +130,35 @@ export class CourseClear extends HTMLElement {
     }
   }
 
+  /**
+   * The short message to show when animating in.
+   *
+   * @attribute greeting
+   * @type {string}
+   * @default "Course Clear!"
+   */
   get greeting() {
     return this.getAttribute("greeting") || "Course Clear!";
   }
 
   set greeting(value: string) {
     this.setAttribute("greeting", value);
+  }
+
+  /**
+   * Set this attribute to close the dialog when the Esc key is pressed. This will close
+   * with an animation.
+   */
+  get closeOnEscape() {
+    return this.hasAttribute("close-on-esc");
+  }
+
+  set closeOnEscape(value: boolean) {
+    if (value) {
+      this.setAttribute("close-on-esc", "");
+    } else {
+      this.removeAttribute("close-on-esc");
+    }
   }
 
   static get observedAttributes() {
@@ -117,17 +170,25 @@ export class CourseClear extends HTMLElement {
 
     switch (name) {
       case "open":
-        this._hideOrRunAnimations();
+        this._closeOrRunAnimations();
         return;
     }
   }
 
+  /**
+   *
+   * @returns The number of vertical bars to animate during the wave. Will be fewer on small
+   * screens.
+   */
   private _getBarCount() {
-    const barCount = parseInt(this.getAttribute("barCount") as string);
-    if (typeof barCount === "number" && barCount > 0) return barCount;
     return window.innerWidth > 768 ? 22 : 11;
   }
 
+  /**
+   * Start the vertical bar wave animation.
+   *
+   * @returns Promise that resolves when the animation is done. Can be canceled.
+   */
   private _animateWave() {
     this._rootEl.classList.remove("is-wave-finished");
 
@@ -185,6 +246,11 @@ export class CourseClear extends HTMLElement {
     );
   }
 
+  /**
+   * Start the initial curtain animation from the top and bottom of the screen.
+   *
+   * @returns Promise that resolves when the animation is done. Can be canceled.
+   */
   private _animateCurtains() {
     this._rootEl.classList.remove("is-wave-finished", "is-curtains-finished");
 
@@ -221,7 +287,12 @@ export class CourseClear extends HTMLElement {
     );
   }
 
-  private _hideOrRunAnimations() {
+  /**
+   * Closes the dialog or runs the animations based the current value of the `open` attribute. If
+   * you close during mid-animation, the close is instant. If the animations are complete, the
+   * dialog will close with a fade out animation (i.e., normal close).
+   */
+  private _closeOrRunAnimations() {
     if (!this._rootEl) return;
     if (this.open) {
       this._rootEl.style.display = "";
@@ -265,6 +336,9 @@ export class CourseClear extends HTMLElement {
     }
   }
 
+  /**
+   * Starts and chanins all the animation to show the dialog. Assumes the modal is open already.
+   */
   private async _animateAll() {
     this._cancelActive();
     this._rootEl.style.display = "";
@@ -281,11 +355,17 @@ export class CourseClear extends HTMLElement {
     this._active = undefined;
   }
 
+  /**
+   * Cancels the active animation, if there is one.
+   */
   private _cancelActive() {
     if (this._active) this._active.cancel();
     this._active = undefined;
   }
 
+  /**
+   * Builds the DOM and connected events. Only call once.
+   */
   private _render() {
     this.shadowRoot!.innerHTML = html`<style>
         ${cssString}
@@ -309,7 +389,16 @@ export class CourseClear extends HTMLElement {
       // Ensure this is hidden so it doesn't transition again if the host is toggles display none
       this._greetingEl.style.display = "none";
     });
+
+    this._rootEl.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      if (this.closeOnEscape) {
+        this.open = false;
+      }
+    });
   }
 }
 
+// XXX: this make hot module reload hard to impossible. Might want a debug flag to reload the whole
+// page if this fails.s
 customElements.define("course-clear", CourseClear);

@@ -47,5 +47,14 @@
     "vite-plugin-dts": "^4.5.3",
     "vite-plugin-web-components-hmr": "^0.1.3",
     "vite-tsconfig-paths": "^5.1.4"
-  }
+  },
+  "license": "MIT",
+  "author": "Jay Gillibrand <jay.gillibrand@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gillibrand/course-clear.git"
+  },
+  "keywords": [
+    "web components"
+  ]
 }

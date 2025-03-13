@@ -12,7 +12,7 @@ Install from NPM with:
 
 ## Usage
 
-From JavaScript:
+### From JavaScript
 
 Use the `open` attribute's presence (or the `.open` setter) to open and close.
 
@@ -26,7 +26,7 @@ courseClear.innerHTML = 'In the dialog.';
 courseClear.open = 'My Greeting!';
 ```
 
-From HTML:
+### From HTML
 
 Importing `course-clear` into a module will automatically define it as a custom HTML element. This is a side-effect of the import. After that, use it like a normal element.
 

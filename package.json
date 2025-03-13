@@ -1,6 +1,6 @@
 {
   "name": "course-clear",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "main": "./dist/CourseClear.cjs.js",
   "module": "./dist/CourseClear.es.js",

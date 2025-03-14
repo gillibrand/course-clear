@@ -432,7 +432,7 @@ export class CourseClear extends HTMLElement {
       }
     });
 
-    this._dialogEl.addEventListener("close", (e) => {
+    this._dialogEl.addEventListener("close", () => {
       this._dialogEl.dispatchEvent(ClosedEvent);
     });
 

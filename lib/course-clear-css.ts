@@ -30,7 +30,8 @@ export default css`
     }
 
     &.is-curtains-finished::backdrop {
-      background-color: rgba(0 0 0 / 0.75);
+      background-color: rgb(0 0 0 / 0.75);
+      backdrop-filter: blur(10px);
     }
   }
 

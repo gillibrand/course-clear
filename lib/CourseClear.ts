@@ -1,6 +1,16 @@
 import cssString from "./course-clear-css.js";
 import { html } from "./util.js";
 
+const ClosedEvent = new Event("closed", {
+  bubbles: true,
+  composed: true,
+});
+
+const OpenedEvent = new CustomEvent("opened", {
+  bubbles: true,
+  composed: true,
+});
+
 /**
  * A promise that can be canceled.
  */
@@ -82,6 +92,8 @@ function once<Args extends unknown[]>(fn: (...args: Args) => void) {
  * button. Optionall add the `close-on-esc` attribute to close with the Esc key.
  *
  * @element course-clear
+ * @fire opened Once open animation finishes.
+ * @fire closed Once closed.
  */
 export class CourseClear extends HTMLElement {
   // So we can set props by index
@@ -95,7 +107,7 @@ export class CourseClear extends HTMLElement {
 
   private _greetingEl = null as unknown as HTMLDivElement;
   private _childrenEl = null as unknown as HTMLDivElement;
-  private _rootEl = null as unknown as HTMLDialogElement;
+  private _dialogEl = null as unknown as HTMLDialogElement;
 
   constructor() {
     super();
@@ -148,6 +160,9 @@ export class CourseClear extends HTMLElement {
   /**
    * Set this attribute to close the dialog when the Esc key is pressed. This will close
    * with an animation.
+   *
+   * @attribute close-on-esc
+   * @type {boolean}
    */
   get closeOnEscape() {
     return this.hasAttribute("close-on-esc");
@@ -161,12 +176,30 @@ export class CourseClear extends HTMLElement {
     }
   }
 
+  /**
+   * Set to close the dialog when clicking the backdrop.
+   *
+   * @attribute close-on-outside
+   * @type {boolean}
+   */
+  get closeOnOutside() {
+    return this.hasAttribute("close-on-outside");
+  }
+
+  set closeOnOutside(value: boolean) {
+    if (value) {
+      this.setAttribute("close-on-outside", "");
+    } else {
+      this.removeAttribute("close-on-outside");
+    }
+  }
+
   static get observedAttributes() {
     return ["open"];
   }
 
   attributeChangedCallback(name: string) {
-    if (!this._rootEl) return;
+    if (!this._dialogEl) return;
 
     switch (name) {
       case "open":
@@ -190,7 +223,7 @@ export class CourseClear extends HTMLElement {
    * @returns Promise that resolves when the animation is done. Can be canceled.
    */
   private _animateWave() {
-    this._rootEl.classList.remove("is-wave-finished");
+    this._dialogEl.classList.remove("is-wave-finished");
 
     const bars: HTMLDivElement[] = [];
 
@@ -201,7 +234,7 @@ export class CourseClear extends HTMLElement {
       bar.className = "CourseClear__bar";
       bar.style.insetInlineStart = `calc(100% / ${barCount}  * ${i})`;
       bar.style.width = `calc(100% / ${barCount} + 1px)`;
-      this._rootEl.appendChild(bar);
+      this._dialogEl.appendChild(bar);
       bars.push(bar);
     }
 
@@ -213,7 +246,7 @@ export class CourseClear extends HTMLElement {
       clearInterval(intervalId);
       anims.forEach((anim) => anim.finish());
       bars.forEach((bar) => bar.parentNode?.removeChild(bar));
-      if (isSuccess) this._rootEl?.classList.add("is-wave-finished");
+      if (isSuccess) this._dialogEl?.classList.add("is-wave-finished");
     });
 
     return cancelable(
@@ -252,15 +285,15 @@ export class CourseClear extends HTMLElement {
    * @returns Promise that resolves when the animation is done. Can be canceled.
    */
   private _animateCurtains() {
-    this._rootEl.classList.remove("is-wave-finished", "is-curtains-finished");
+    this._dialogEl.classList.remove("is-wave-finished", "is-curtains-finished");
 
     const top = document.createElement("div");
     top.className = "CourseClear__curtain CourseClear__curtain--top";
     const bottom = document.createElement("div");
     bottom.className = "CourseClear__curtain CourseClear__curtain--bottom";
 
-    this._rootEl.appendChild(top);
-    this._rootEl.appendChild(bottom);
+    this._dialogEl.appendChild(top);
+    this._dialogEl.appendChild(bottom);
 
     let frameID = requestAnimationFrame(() => {
       // This ensure we have done an initial layout, then add the class to transition after
@@ -280,7 +313,7 @@ export class CourseClear extends HTMLElement {
       new Promise<void>((resolve) => {
         bottom.addEventListener("transitionend", () => {
           cleanup();
-          this._rootEl.classList.add("is-curtains-finished");
+          this._dialogEl.classList.add("is-curtains-finished");
           resolve();
         });
       })
@@ -292,19 +325,21 @@ export class CourseClear extends HTMLElement {
    * you close during mid-animation, the close is instant. If the animations are complete, the
    * dialog will close with a fade out animation (i.e., normal close).
    */
-  private _closeOrRunAnimations() {
-    if (!this._rootEl) return;
+  private async _closeOrRunAnimations() {
+    if (!this._dialogEl) return;
+
     if (this.open) {
-      this._rootEl.style.display = "";
-      this._rootEl.showModal();
-      this._animateAll();
+      this._dialogEl.style.display = "";
+      this._dialogEl.showModal();
+      await this._animateAll();
+      this._dialogEl.dispatchEvent(OpenedEvent);
       return;
     }
 
     const closeCleanup = () => {
-      this._rootEl.style.display = "none";
-      this._rootEl.classList.remove("is-curtains-finished", "is-wave-finished");
-      this._rootEl.close();
+      this._dialogEl.style.display = "none";
+      this._dialogEl.classList.remove("is-curtains-finished", "is-wave-finished");
+      this._dialogEl.close();
     };
 
     if (this._active) {
@@ -314,9 +349,9 @@ export class CourseClear extends HTMLElement {
     } else {
       // We're done animating and settled, so animate out too/
       // remove curtains class early to trigger backdrop transition
-      this._rootEl.classList.remove("is-curtains-finished");
+      this._dialogEl.classList.remove("is-curtains-finished");
 
-      this._rootEl
+      this._dialogEl
         .animate(
           [
             {
@@ -341,12 +376,12 @@ export class CourseClear extends HTMLElement {
    */
   private async _animateAll() {
     this._cancelActive();
-    this._rootEl.style.display = "";
+    this._dialogEl.style.display = "";
 
     this._greetingEl.textContent = this.greeting;
     this._greetingEl.style.display = "";
 
-    this._rootEl.classList.remove("is-curtains-finished", "is-wave-finished");
+    this._dialogEl.classList.remove("is-curtains-finished", "is-wave-finished");
 
     this._active = this._animateCurtains();
     await this._active;
@@ -367,17 +402,17 @@ export class CourseClear extends HTMLElement {
    * Builds the DOM and connected events. Only call once.
    */
   private _render() {
-    this.shadowRoot!.innerHTML = html`<style>
+    this.shadowRoot!.innerHTML = html`<dialog class="CourseClear" id="_dialogEl" style="display: none">
+      <style>
         ${cssString}
       </style>
-      <dialog class="CourseClear" id="_rootEl" style="display: none">
-        <div class="CourseClear__content">
-          <div class="CourseClear__greeting" id="_greetingEl"></div>
-          <div class="CourseClear__children" id="_childrenEl">
-            <slot />
-          </div>
+      <div class="CourseClear__content">
+        <div class="CourseClear__greeting" id="_greetingEl"></div>
+        <div class="CourseClear__children" id="_childrenEl">
+          <slot />
         </div>
-      </dialog>`;
+      </div>
+    </dialog>`;
 
     // Ref all the elements with IDs
     this.shadowRoot!.querySelectorAll("[id]").forEach((el) => {
@@ -390,9 +425,19 @@ export class CourseClear extends HTMLElement {
       this._greetingEl.style.display = "none";
     });
 
-    this._rootEl.addEventListener("cancel", (e) => {
+    this._dialogEl.addEventListener("cancel", (e) => {
       e.preventDefault();
       if (this.closeOnEscape) {
+        this.open = false;
+      }
+    });
+
+    this._dialogEl.addEventListener("close", (e) => {
+      this._dialogEl.dispatchEvent(ClosedEvent);
+    });
+
+    this._dialogEl.addEventListener("click", (e: MouseEvent) => {
+      if (!this._active && this.closeOnOutside && (e.target as HTMLDialogElement).nodeName === "DIALOG") {
         this.open = false;
       }
     });

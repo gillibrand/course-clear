@@ -5,6 +5,7 @@ declare global {
         greeting?: string;
         open?: string;
         "close-on-esc"?: string;
+        "close-on-outside"?: string;
       };
     }
   }

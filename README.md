@@ -14,26 +14,24 @@ Install from NPM with:
 
 ### From JavaScript
 
-Use the `open` attribute's presence (or the `.open` setter) to open and close.
+Use the `.open` setter (or the attribute's) presence to open and close.
 
-```
-import { CourseClear } from 'course-clear';
+```js
+import { CourseClear } from "course-clear";
 
 const courseClear = new CourseClear();
 document.body.appendChild(courseClear);
-courseClear.greeting = 'My Greeting!';
-courseClear.innerHTML = 'In the dialog.';
-courseClear.open = 'My Greeting!';
+courseClear.greeting = "My Greeting!";
+courseClear.innerHTML = "In the dialog.";
+courseClear.open = "My Greeting!";
 ```
 
 ### From HTML
 
-Importing `course-clear` into a module will automatically define it as a custom HTML element. This is a side-effect of the import. After that, use it like a normal element.
+Importing `course-clear` into a module will automatically define it as a custom HTML element. This is a side-effect of the import. After that, use it like a normal element. Toggle the `open` attribute to open or close. Add `close-on-esc` to support closing with the escape key.
 
-```
+```html
 <body>
-  <course-clear greeting="My Greeting!" open>
-    In the dialog.
-  </course-clear>
+  <course-clear greeting="My Greeting!" open close-on-esc> In the dialog. </course-clear>
 </body>
 ```

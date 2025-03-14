@@ -150,7 +150,7 @@ export class CourseClear extends HTMLElement {
    * @default "Course Clear!"
    */
   get greeting() {
-    return this.getAttribute("greeting") || "Course Clear!";
+    return this.getAttribute("greeting")?.trim() || "Course Clear!";
   }
 
   set greeting(value: string) {

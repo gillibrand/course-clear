@@ -38,7 +38,7 @@ export default css`
   .CourseClear__content {
     box-sizing: border-box;
     width: 100%;
-    height: 50%;
+    min-height: 50%;
     padding: 1rem;
     display: grid;
     place-items: center;

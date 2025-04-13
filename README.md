@@ -23,7 +23,7 @@ const courseClear = new CourseClear();
 document.body.appendChild(courseClear);
 courseClear.greeting = "My Greeting!";
 courseClear.innerHTML = "In the dialog.";
-courseClear.open = "My Greeting!";
+courseClear.open = true;
 ```
 
 ### From HTML

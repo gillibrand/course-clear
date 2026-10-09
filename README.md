@@ -14,7 +14,7 @@ Install from NPM with:
 
 ### From JavaScript
 
-Use the `.open` setter (or the attribute's) presence to open and close.
+Set the `open` property (or toggle the `open` attribute) to open and close.
 
 ```js
 import { CourseClear } from "course-clear";
